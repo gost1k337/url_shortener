@@ -21,9 +21,9 @@ func NewShortUrlRepo(pg *postgres.Postgres, logger logging.Logger) *ShortUrlRepo
 }
 
 func (r *ShortUrlRepo) Create(ctx context.Context, userId int, originalUrl, shortUrl string, expireAt time.Duration) error {
-	query := `INSERT INTO url_shorts (original_url, short_url, expire_at) VALUES ($1, $2, $3)`
+	query := `INSERT INTO url_shorts (original_url, short_url, visits, expire_at) VALUES ($1, $2, $3, $4)`
 
-	_, err := r.ExecContext(ctx, query, originalUrl, shortUrl, expireAt)
+	_, err := r.ExecContext(ctx, query, originalUrl, shortUrl, 0, expireAt)
 	if err != nil {
 		return fmt.Errorf("exec: %w", err)
 	}
