@@ -17,6 +17,7 @@ message CreateUrlShortRequest {
 }
 
 message CreateUrlShortResponse {
+  int64 id = 1;
   string original_url = 2;
   string short_url = 3;
   google.protobuf.Timestamp expire_at = 4;
@@ -25,7 +26,14 @@ message CreateUrlShortResponse {
 }
 
 message GetUrlShortRequest {
+  string token = 1;
 }
 
 message GetUrlShortResponse {
+  int64 id = 1;
+  string original_url = 2;
+  string short_url = 3;
+  google.protobuf.Timestamp expire_at = 4;
+  int64 visits = 5;
+  google.protobuf.Timestamp created_at = 6;
 }
