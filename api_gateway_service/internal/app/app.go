@@ -3,10 +3,12 @@ package app
 import (
 	"fmt"
 	"github.com/gost1k337/url_shortener/api_gateway_service/config"
+	"github.com/gost1k337/url_shortener/api_gateway_service/internal/client/url_short_service"
 	"github.com/gost1k337/url_shortener/api_gateway_service/internal/handlers"
 	"github.com/gost1k337/url_shortener/api_gateway_service/internal/service"
 	"github.com/gost1k337/url_shortener/api_gateway_service/pkg/httpserver"
 	"github.com/gost1k337/url_shortener/api_gateway_service/pkg/logging"
+	us "github.com/gost1k337/url_shortener/url_shortening_service/api/protos/url_shorts"
 	"os"
 	"os/signal"
 	"syscall"
@@ -15,8 +17,17 @@ import (
 func Run(cfg *config.Config) {
 	log := logging.NewLogger(cfg)
 
+	log.Info("Connecting to url-shortening service...")
+	usGrpcClient, err := url_short_service.NewUrlShortServiceConn(fmt.Sprintf(":%s", cfg.UrlShorteningService.Port), log)
+	if err != nil {
+		log.Error("grpc: %w", err)
+	}
+	usService := us.NewUrlShortsClient(usGrpcClient.GRPCClient)
+
 	log.Info("Initializing services...")
-	services := service.NewServices(&service.ServicesDependencies{}, log)
+	services := service.NewServices(&service.Deps{
+		UrlShortService: usService,
+	}, log)
 
 	log.Info("Initializing handlers...")
 	handler := handlers.New(services, log)
@@ -34,7 +45,7 @@ func Run(cfg *config.Config) {
 	}
 
 	log.Info("Shutting down...")
-	err := httpServer.Shutdown()
+	err = httpServer.Shutdown()
 	if err != nil {
 		log.Error(fmt.Errorf("app - Run - httpServer.Shutdown: %w", err))
 	}

@@ -1,12 +1,15 @@
 package handlers
 
 import (
+	"encoding/json"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/gost1k337/url_shortener/api_gateway_service/internal/handlers/middlewares"
 	"github.com/gost1k337/url_shortener/api_gateway_service/internal/service"
 	"github.com/gost1k337/url_shortener/api_gateway_service/pkg/logging"
 	"github.com/rs/cors"
 	"net/http"
+	"time"
 )
 
 type Handler struct {
@@ -38,6 +41,9 @@ func New(services *service.Services, logger logging.Logger) *Handler {
 	r := chi.NewRouter()
 	r.Use(corsCfg.Handler)
 	r.Use(middleware.DefaultLogger)
+	r.Use(middlewares.CommonMiddleware)
+	r.Post("/short", h.Create)
+	r.Get("/u/{token}", h.Redirect)
 
 	h.http = r
 	return h
@@ -45,4 +51,45 @@ func New(services *service.Services, logger logging.Logger) *Handler {
 
 func (h *Handler) HTTP() http.Handler {
 	return h.http
+}
+
+func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
+	var input CreateUrlShortInput
+
+	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		h.logger.Error(err.Error())
+		return
+	}
+	input.ExpireAt = input.ExpireAt * time.Hour
+
+	res, err := h.services.UrlShort.Create(r.Context(), input.OriginalUrl, input.ExpireAt)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		h.logger.Error(err.Error())
+		return
+	}
+	if err := json.NewEncoder(w).Encode(res); err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		h.logger.Error(err.Error())
+		return
+	}
+	w.WriteHeader(201)
+}
+
+func (h *Handler) Redirect(w http.ResponseWriter, r *http.Request) {
+	token := chi.URLParam(r, "token")
+	h.logger.Info(token)
+	res, err := h.services.UrlShort.Get(r.Context(), token)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		h.logger.Error(err.Error())
+		return
+	}
+	if res == nil {
+		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+		h.logger.Error(err.Error())
+		return
+	}
+	http.Redirect(w, r, res.OriginalUrl, http.StatusSeeOther)
 }
