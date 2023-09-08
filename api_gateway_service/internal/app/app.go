@@ -14,6 +14,13 @@ import (
 	"syscall"
 )
 
+// Run
+//
+// @title           			Url Shortener
+// @version         			1.0
+// @description     			This is a REST API service for creating short urls.
+// @host      					localhost:10000
+// @BasePath  					/
 func Run(cfg *config.Config) {
 	log := logging.NewLogger(cfg)
 
@@ -30,7 +37,7 @@ func Run(cfg *config.Config) {
 	}, log)
 
 	log.Info("Initializing handlers...")
-	handler := handlers.New(services, log)
+	handler := handlers.New(services, log, cfg)
 
 	httpServer := httpserver.New(handler.HTTP(), httpserver.Port(cfg.App.Port))
 	log.Infof("Server started on port %s", cfg.App.Port)

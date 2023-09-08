@@ -9,6 +9,7 @@ import (
 type Config struct {
 	App struct {
 		Port      string `yaml:"port"`
+		Host      string `yaml:"host"`
 		Debug     bool   `yaml:"debug"`
 		LogOutput string `yaml:"log_output"`
 	} `yaml:"app"`

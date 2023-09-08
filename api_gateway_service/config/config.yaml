@@ -1,5 +1,6 @@
 app:
   port: 10000
+  host: "localhost"
   debug: true
   log_output: "./info"
 url_shortening_service:
