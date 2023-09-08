@@ -2,3 +2,5 @@ app:
   port: 10000
   debug: true
   log_output: "./info"
+url_shortening_service:
+  port: 10001

@@ -12,6 +12,10 @@ type Config struct {
 		Debug     bool   `yaml:"debug"`
 		LogOutput string `yaml:"log_output"`
 	} `yaml:"app"`
+
+	UrlShorteningService struct {
+		Port string `yaml:"port"`
+	} `yaml:"url_shortening_service"`
 }
 
 func LoadConfig(configPath string) (*Config, error) {
