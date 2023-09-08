@@ -11,11 +11,6 @@ endif
 SOURCE="FILE://MIGRATIONS"
 MIGRATE=$(RUNNER)
 DB=${POSTGRES_DSN}
-SWAGGER=swag
-SWAGGER_PATH="./internal/app/app.go"
-
-swagger init:
-	$(SWAGGER) init -g ${SWAGGER_PATH}
 
 migrate-status:
 	$(MIGRATE) version
