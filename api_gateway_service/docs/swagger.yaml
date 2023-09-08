@@ -1,0 +1,41 @@
+basePath: /
+host: localhost:10000
+info:
+  contact: {}
+  description: This is a REST API service for creating short urls.
+  title: Url Shortener
+  version: "1.0"
+paths:
+  /short:
+    post:
+      description: Create short url from url and return it
+      operationId: create-short-url
+      responses:
+        "201":
+          description: Created
+        "400":
+          description: Bad Request
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Create short url
+      tags:
+      - ShortUrl
+  /u/{token}:
+    get:
+      description: Redirect user from short url to original url
+      operationId: redirect-short-url
+      responses:
+        "303":
+          description: See Other
+        "400":
+          description: Bad Request
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Redirect to original url
+      tags:
+      - ShortUrl
+swagger: "2.0"

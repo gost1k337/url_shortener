@@ -1,0 +1,59 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "This is a REST API service for creating short urls.",
+        "title": "Url Shortener",
+        "contact": {},
+        "version": "1.0"
+    },
+    "host": "localhost:10000",
+    "basePath": "/",
+    "paths": {
+        "/short": {
+            "post": {
+                "description": "Create short url from url and return it",
+                "tags": [
+                    "ShortUrl"
+                ],
+                "summary": "Create short url",
+                "operationId": "create-short-url",
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/u/{token}": {
+            "get": {
+                "description": "Redirect user from short url to original url",
+                "tags": [
+                    "ShortUrl"
+                ],
+                "summary": "Redirect to original url",
+                "operationId": "redirect-short-url",
+                "responses": {
+                    "303": {
+                        "description": "See Other"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            }
+        }
+    }
+}
