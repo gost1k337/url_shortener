@@ -2,8 +2,8 @@ package service
 
 import (
 	"context"
-	"fmt"
 	"github.com/gost1k337/url_shortener/url_shortening_service/config"
+	"github.com/gost1k337/url_shortener/url_shortening_service/internal/entity"
 	"github.com/gost1k337/url_shortener/url_shortening_service/internal/repository"
 	"github.com/gost1k337/url_shortener/url_shortening_service/pkg/hasher"
 	"github.com/gost1k337/url_shortener/url_shortening_service/pkg/logging"
@@ -12,12 +12,12 @@ import (
 )
 
 type ShortUrlService struct {
-	repo   repository.ShortUrlRepo
+	repo   repository.ShortUrl
 	logger logging.Logger
 	cfg    *config.Config
 }
 
-func NewShortUrlService(repo repository.ShortUrlRepo, logger logging.Logger, cfg *config.Config) *ShortUrlService {
+func NewShortUrlService(repo repository.ShortUrl, logger logging.Logger, cfg *config.Config) *ShortUrlService {
 	return &ShortUrlService{
 		repo:   repo,
 		logger: logger,
@@ -25,14 +25,27 @@ func NewShortUrlService(repo repository.ShortUrlRepo, logger logging.Logger, cfg
 	}
 }
 
-func (s *ShortUrlService) Create(ctx context.Context, userId int, originalUrl string, expireAt time.Duration) error {
+func (s *ShortUrlService) Create(ctx context.Context, userId int, originalUrl string, expireAt time.Time) (*entity.ShortURL, error) {
 	token := hasher.NewShortUrl(rand.Uint64())
-	shortUrl := fmt.Sprintf("%s/%s", s.cfg.App.BaseURL, token)
 
-	err := s.repo.Create(ctx, userId, originalUrl, shortUrl, expireAt)
+	id, err := s.repo.Create(ctx, userId, originalUrl, token, expireAt)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	shortUrl, err := s.repo.GetById(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	return shortUrl, nil
+}
+
+func (s *ShortUrlService) GetByShortToken(ctx context.Context, shortUrlToken string) (*entity.ShortURL, error) {
+	shortUrl, err := s.repo.GetByShort(ctx, shortUrlToken)
+	if err != nil {
+		return nil, err
+	}
+
+	return shortUrl, nil
 }
