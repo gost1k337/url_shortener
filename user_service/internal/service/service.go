@@ -9,8 +9,9 @@ import (
 )
 
 type User interface {
-	Create(ctx context.Context, username, string, passwordHash string) (*entity.User, error)
+	Create(ctx context.Context, username, email, passwordHash string) (*entity.User, error)
 	GetById(ctx context.Context, id int64) (*entity.User, error)
+	Delete(ctx context.Context, id int64) (*entity.User, error)
 }
 
 type Services struct {
