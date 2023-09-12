@@ -11,7 +11,6 @@ type Config struct {
 		Port      string `yaml:"port"`
 		Debug     bool   `yaml:"debug"`
 		LogOutput string `yaml:"log_output"`
-		BaseURL   string `yaml:"base_url" env:"BASE_URL" env-required:"true"`
 	} `yaml:"app"`
 
 	Db struct {
