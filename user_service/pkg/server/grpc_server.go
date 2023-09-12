@@ -4,7 +4,7 @@ import (
 	"fmt"
 	proto "github.com/gost1k337/url_shortener/user_service/api/protos/user"
 	"github.com/gost1k337/url_shortener/user_service/config"
-	urlShortGrpc "github.com/gost1k337/url_shortener/user_service/internal/delivery/grpc"
+	userGrpc "github.com/gost1k337/url_shortener/user_service/internal/delivery/grpc"
 	"github.com/gost1k337/url_shortener/user_service/internal/service"
 	"github.com/gost1k337/url_shortener/user_service/pkg/logging"
 	"google.golang.org/grpc"
@@ -21,7 +21,7 @@ const (
 	gRPCTime          = 10
 )
 
-func NewUrlShortGrpcServer(cfg *config.Config, logger logging.Logger, services *service.Services) (func() error, *grpc.Server, error) {
+func NewUserGrpcServer(cfg *config.Config, logger logging.Logger, services *service.Services) (func() error, *grpc.Server, error) {
 	l, err := net.Listen("tcp", fmt.Sprintf(":%s", cfg.App.Port))
 	if err != nil {
 		return nil, nil, fmt.Errorf("net listen: %w", err)
@@ -36,15 +36,15 @@ func NewUrlShortGrpcServer(cfg *config.Config, logger logging.Logger, services *
 		}),
 	)
 
-	urlShortGrpcService := urlShortGrpc.NewUserGrpcService(logger, services.User)
-	proto.RegisterUserServer(grpcServer, urlShortGrpcService)
+	userGrpcService := userGrpc.NewUserGrpcService(logger, services.User)
+	proto.RegisterUserServer(grpcServer, userGrpcService)
 
 	if cfg.App.Debug {
 		reflection.Register(grpcServer)
 	}
 
 	go func() {
-		logger.Infof("UrlShort grpc server listening on port: %s", cfg.App.Port)
+		logger.Infof("User grpc server listening on port: %s", cfg.App.Port)
 		logger.Fatal(grpcServer.Serve(l))
 	}()
 

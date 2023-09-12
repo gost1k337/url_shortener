@@ -33,9 +33,9 @@ func Run(cfg *config.Config) {
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
 	defer cancel()
 
-	closeGrpcServer, grpcServer, err := server.NewUrlShortGrpcServer(cfg, log, services)
+	closeGrpcServer, grpcServer, err := server.NewUserGrpcServer(cfg, log, services)
 	if err != nil {
-		log.Error("new url short grpc: %w", err)
+		log.Error("new user grpc: %w", err)
 	}
 	defer closeGrpcServer()
 
