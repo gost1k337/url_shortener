@@ -2,59 +2,83 @@ package grpc
 
 import (
 	"context"
+	"errors"
 	proto "github.com/gost1k337/url_shortener/user_service/api/protos/user"
 	"github.com/gost1k337/url_shortener/user_service/internal/service"
 	"github.com/gost1k337/url_shortener/user_service/pkg/logging"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type UserGrpcService struct {
 	proto.UnimplementedUserServer
 	logger logging.Logger
-	su     service.User
+	u      service.User
 }
 
 func NewUserGrpcService(logger logging.Logger, su service.User) *UserGrpcService {
 	return &UserGrpcService{
 		logger: logger,
-		su:     su,
+		u:      su,
 	}
 }
 
 func (s *UserGrpcService) Create(ctx context.Context, req *proto.CreateUserRequest) (*proto.CreateUserResponse, error) {
-	//s.logger.Infof("UrlShort create method grpc call")
-	//shortUrl, err := s.su.Create(ctx, 1, req.OriginalUrl, req.ExpireAt.AsTime())
-	//if err != nil {
-	//	s.logger.Error(err)
-	//	return nil, fmt.Errorf("new short url: %w", err)
-	//}
-	//
-	//resp := &proto.CreateUserResponse{
-	//	Id:          shortUrl.Id,
-	//	OriginalUrl: shortUrl.OriginalURL,
-	//	ShortUrl:    shortUrl.ShortURL,
-	//	ExpireAt:    timestamppb.New(shortUrl.ExpireAt),
-	//	Visits:      shortUrl.Visits,
-	//	CreatedAt:   timestamppb.New(shortUrl.CreatedAt),
-	//}
-	return nil, nil
+	s.logger.Infof("User create method grpc call")
+	user, err := s.u.Create(ctx, req.Username, req.Email, req.PasswordHash)
+	if err != nil {
+		s.logger.Error(err)
+		return nil, status.Errorf(codes.Internal, "create user: %v", err)
+	}
+
+	resp := &proto.CreateUserResponse{
+		Id:           user.Id,
+		Username:     user.Username,
+		Email:        user.Email,
+		PasswordHash: user.PasswordHash,
+		CreatedAt:    timestamppb.New(user.CreatedAt),
+	}
+	return resp, status.Errorf(codes.OK, "success")
 }
 
 func (s *UserGrpcService) Get(ctx context.Context, req *proto.GetUserRequest) (*proto.GetUserResponse, error) {
-	//s.logger.Infof("UrlShort get method grpc call")
-	//shortUrl, err := s.su.GetByShortToken(ctx, req.Token)
-	//if err != nil {
-	//	s.logger.Error(err)
-	//	return nil, fmt.Errorf("get short url: %w", err)
-	//}
-	//
-	//resp := &proto.GetUserResponse{
-	//	Id:          shortUrl.Id,
-	//	OriginalUrl: shortUrl.OriginalURL,
-	//	ShortUrl:    shortUrl.ShortURL,
-	//	ExpireAt:    timestamppb.New(shortUrl.ExpireAt),
-	//	Visits:      shortUrl.Visits,
-	//	CreatedAt:   timestamppb.New(shortUrl.CreatedAt),
-	//}
-	//
-	return nil, nil
+	s.logger.Infof("User get method grpc call")
+	user, err := s.u.GetById(ctx, req.Id)
+	if err != nil {
+		s.logger.Error(err)
+		if errors.Is(err, service.ErrUserNotFound) {
+			return nil, status.Errorf(codes.NotFound, "not found")
+		}
+		return nil, status.Errorf(codes.Internal, "internal error: %v", err)
+	}
+
+	resp := &proto.GetUserResponse{
+		Id:        user.Id,
+		Username:  user.Username,
+		Email:     user.Email,
+		CreatedAt: timestamppb.New(user.CreatedAt),
+	}
+	return resp, status.Errorf(codes.OK, "success")
+}
+
+func (s *UserGrpcService) Delete(ctx context.Context, req *proto.DeleteUserRequest) (*proto.DeleteUserResponse, error) {
+	s.logger.Infof("User delete method grpc call")
+	user, err := s.u.Delete(ctx, req.Id)
+	if err != nil {
+		s.logger.Error(err)
+		if errors.Is(err, service.ErrUserNotFound) {
+			return nil, status.Error(codes.NotFound, err.Error())
+		}
+		return nil, status.Errorf(codes.Internal, "delete user: %v", err)
+	}
+
+	resp := &proto.DeleteUserResponse{
+		Id:        user.Id,
+		Username:  user.Username,
+		Email:     user.Email,
+		CreatedAt: timestamppb.New(user.CreatedAt),
+	}
+
+	return resp, status.Error(codes.OK, "")
 }
