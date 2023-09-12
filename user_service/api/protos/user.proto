@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package url_shorts;
+package users;
 
 option go_package = "/user";
 
@@ -9,6 +9,7 @@ import "google/protobuf/timestamp.proto";
 service User {
   rpc Create(CreateUserRequest) returns (CreateUserResponse);
   rpc Get(GetUserRequest) returns (GetUserResponse);
+  rpc Delete(DeleteUserRequest) returns (DeleteUserResponse);
 }
 
 message CreateUserRequest {
@@ -26,7 +27,23 @@ message CreateUserResponse {
 }
 
 message GetUserRequest {
+  int64 id = 1;
 }
 
 message GetUserResponse {
+  int64 id = 1;
+  string username = 2;
+  string email = 3;
+  google.protobuf.Timestamp created_at = 4;
+}
+
+message DeleteUserRequest {
+  int64 id = 1;
+}
+
+message DeleteUserResponse {
+  int64 id = 1;
+  string username = 2;
+  string email = 3;
+  google.protobuf.Timestamp created_at = 4;
 }
