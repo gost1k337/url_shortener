@@ -1,3 +1,6 @@
+include .env
+export
+
 RUNNER=migrate
 
 ifeq ($(p),host)
