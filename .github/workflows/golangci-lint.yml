@@ -17,10 +17,6 @@ jobs:
       matrix:
         go: [ '1.21' ]
         os: [ macos-latest ]
-        service:
-          - api_gateway_service
-          - url_shortening_service
-          - user_service
     name: lint
     runs-on: ${{ matrix.os }}
     steps:
@@ -33,9 +29,18 @@ jobs:
         uses: golangci/golangci-lint-action@v3
         with:
           version: v1.54
-      - name: Run golangci-lint for ${{ matrix.service }}
-        run: |
-          cd ${{ matrix.service }}
-          golangci-lint run
-          env:
+      - name: Lint user_service
+        run: golangci-lint run ./user_service
+        working-directory: ./user_service
+        env:
+          GO111MODULE: on
+      - name: Lint url_shortening_service
+        run: golangci-lint run ./url_shortening_service
+        working-directory: ./url_shortening_service
+        env:
+          GO111MODULE: on
+      - name: Lint api_gateway_service
+        run: golangci-lint run ./api_gateway_service
+        working-directory: ./api_gateway_service
+        env:
           GO111MODULE: on
