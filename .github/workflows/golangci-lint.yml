@@ -31,9 +31,9 @@ jobs:
           cache: false
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v3
-      - name: Run golangci-lint for ${{ matrix.service }}
         with:
           version: v1.54
+      - name: Run golangci-lint for ${{ matrix.service }}
         run: |
           cd ${{ matrix.service }}
           golangci-lint run
