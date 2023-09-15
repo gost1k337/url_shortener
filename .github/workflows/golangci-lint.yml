@@ -11,12 +11,19 @@ permissions:
   # Optional: allow read access to pull request. Use with `only-new-issues` option.
   # pull-requests: read
 
+env:
+  service:
+
 jobs:
   golangci:
     strategy:
       matrix:
-        go: ['1.21']
-        os: [macos-latest, windows-latest]
+        go: [ '1.21' ]
+        os: [ macos-latest ]
+        service:
+          - api_gateway_service
+          - url_shortening_service
+          - user_service
     name: lint
     runs-on: ${{ matrix.os }}
     steps:
