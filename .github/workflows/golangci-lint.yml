@@ -26,26 +26,17 @@ jobs:
           go-version: ${{ matrix.go }}
           cache: false
       - name: Lint user_service
-        run: |
-          ls
-          cd ./user_service
-          golangci-lint run
+        run: golangci-lint run
         working-directory: ./user_service
         env:
           GO111MODULE: on
       - name: Lint url_shortening_service
-        run: |
-          ls
-          cd ./url_shortening_service
-          golangci-lint run
+        run: golangci-lint run
         working-directory: ./url_shortening_service
         env:
           GO111MODULE: on
       - name: Lint api_gateway_service
-        run: |
-          ls
-          cd ./api_gateway_service
-          golangci-lint run
+        run: golangci-lint run
         working-directory: ./api_gateway_service
         env:
           GO111MODULE: on
