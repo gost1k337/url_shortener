@@ -5,3 +5,5 @@ app:
   log_output: "./info"
 url_shortening_service:
   port: 10001
+user_service:
+  port: 10002

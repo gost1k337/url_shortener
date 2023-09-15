@@ -17,6 +17,10 @@ type Config struct {
 	UrlShorteningService struct {
 		Port string `yaml:"port"`
 	} `yaml:"url_shortening_service"`
+
+	UserService struct {
+		Port string `yaml:"port"`
+	} `yaml:"user_service"`
 }
 
 func LoadConfig(configPath string) (*Config, error) {
