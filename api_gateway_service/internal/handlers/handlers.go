@@ -49,7 +49,7 @@ func New(services *service.Services, logger logging.Logger, cfg *config.Config) 
 	r.Get("/swagger/*", httpSwagger.Handler(
 		httpSwagger.URL(fmt.Sprintf("http://%s:%s/swagger/doc.json", cfg.App.Host, cfg.App.Port)),
 	))
-	r.Post("/short", h.Create)
+	r.Post("/short", h.CreateUrlShort)
 	r.Get("/u/{token}", h.Redirect)
 
 	h.http = r
@@ -60,7 +60,7 @@ func (h *Handler) HTTP() http.Handler {
 	return h.http
 }
 
-// Create godoc
+// CreateUrlShort godoc
 //
 // @Summary Create short url
 // @Description Create short url from url and return it
@@ -70,7 +70,7 @@ func (h *Handler) HTTP() http.Handler {
 // @Failure 400 {object} error
 // @Failure 500 {object} error
 // @Router /short [post]
-func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) CreateUrlShort(w http.ResponseWriter, r *http.Request) {
 	var input CreateUrlShortInput
 
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
@@ -91,7 +91,7 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 		h.logger.Error(err.Error())
 		return
 	}
-	w.WriteHeader(201)
+	w.WriteHeader(http.StatusCreated)
 }
 
 // Redirect godoc

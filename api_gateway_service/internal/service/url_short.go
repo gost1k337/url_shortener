@@ -26,17 +26,17 @@ func (s *UrlShortService) Create(ctx context.Context, originalUrl string, expire
 		OriginalUrl: originalUrl,
 		ExpireAt:    timestamppb.New(time.Now().Add(expireAt)),
 	}
-	us, err := s.c.Create(ctx, createUrlShortReq)
+	u, err := s.c.Create(ctx, createUrlShortReq)
 	if err != nil {
 		return nil, fmt.Errorf("url-short create: %w", err)
 	}
 	res := &CreateUrlShortResp{
-		Id:          us.Id,
-		OriginalUrl: us.OriginalUrl,
-		ShortUrl:    us.ShortUrl,
-		Visits:      us.Visits,
-		ExpireAt:    us.ExpireAt.AsTime(),
-		CreatedAt:   us.CreatedAt.AsTime(),
+		Id:          u.Id,
+		OriginalUrl: u.OriginalUrl,
+		ShortUrl:    u.ShortUrl,
+		Visits:      u.Visits,
+		ExpireAt:    u.ExpireAt.AsTime(),
+		CreatedAt:   u.CreatedAt.AsTime(),
 	}
 	return res, nil
 }
