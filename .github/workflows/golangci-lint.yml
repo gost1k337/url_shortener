@@ -27,21 +27,21 @@ jobs:
           cache: false
       - name: Install golangci-lint
         run: |
-          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.54.2
+          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.54.2 $GOLANGCI_LINT
         env:
           GO111MODULE: on
       - name: Lint user_service
-        run: golangci-lint run
+        run: $GOLANGCI_LINT run
         working-directory: ./user_service
         env:
           GO111MODULE: on
       - name: Lint url_shortening_service
-        run: golangci-lint run
+        run: $GOLANGCI_LINT run
         working-directory: ./url_shortening_service
         env:
           GO111MODULE: on
       - name: Lint api_gateway_service
-        run: golangci-lint run
+        run: $GOLANGCI_LINT run
         working-directory: ./api_gateway_service
         env:
           GO111MODULE: on
