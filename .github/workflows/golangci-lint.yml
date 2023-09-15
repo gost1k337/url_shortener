@@ -34,17 +34,14 @@ jobs:
         run: golangci-lint run
         working-directory: ./user_service
         env:
-          PATH: ${{ runner.path }}
           GO111MODULE: on
       - name: Lint url_shortening_service
         run: golangci-lint run
         working-directory: ./url_shortening_service
         env:
-          PATH: ${{ runner.path }}
           GO111MODULE: on
       - name: Lint api_gateway_service
         run: golangci-lint run
         working-directory: ./api_gateway_service
         env:
-          PATH: ${{ runner.path }}
           GO111MODULE: on
