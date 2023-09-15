@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -13,6 +14,7 @@ import (
 	"github.com/rs/cors"
 	httpSwagger "github.com/swaggo/http-swagger"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -51,6 +53,9 @@ func New(services *service.Services, logger logging.Logger, cfg *config.Config) 
 	))
 	r.Post("/short", h.CreateUrlShort)
 	r.Get("/u/{token}", h.Redirect)
+	r.Post("/users", h.CreateUser)
+	r.Get("/users/{id}", h.GetUser)
+	r.Delete("/users/{id}", h.DeleteUser)
 
 	h.http = r
 	return h
@@ -119,4 +124,115 @@ func (h *Handler) Redirect(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	http.Redirect(w, r, res.OriginalUrl, http.StatusSeeOther)
+}
+
+// CreateUser godoc
+//
+// @Summary Create user
+// @Description Create user
+// @ID create-user
+// @Tags User
+// @Success 201
+// @Failure 400 {object} error
+// @Failure 500 {object} error
+// @Router /users [post]
+func (h *Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
+	var input CreateUserInput
+
+	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		h.logger.Error(err.Error())
+		return
+	}
+
+	res, err := h.services.User.Create(r.Context(), input.Username, input.Email, input.Password)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		h.logger.Error(err.Error())
+		return
+	}
+	if err := json.NewEncoder(w).Encode(res); err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		h.logger.Error(err.Error())
+		return
+	}
+	w.WriteHeader(http.StatusCreated)
+}
+
+// GetUser godoc
+//
+// @Summary Get user
+// @Description Get user
+// @ID get-user
+// @Tags User
+// @Success 200
+// @Failure 400 {object} error
+// @Failure 404 {object} error
+// @Failure 500 {object} error
+// @Router /users/{id} [post]
+func (h *Handler) GetUser(w http.ResponseWriter, r *http.Request) {
+	p := chi.URLParam(r, "id")
+	id, err := strconv.ParseInt(p, 10, 64)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		h.logger.Error(err.Error())
+		return
+	}
+
+	res, err := h.services.User.Get(r.Context(), id)
+	if err != nil {
+		if errors.Is(err, service.ErrUserNotFound) {
+			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+			h.logger.Error(err.Error())
+			return
+		}
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		h.logger.Error(err.Error())
+		return
+	}
+	if err := json.NewEncoder(w).Encode(res); err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		h.logger.Error(err.Error())
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
+// DeleteUser godoc
+//
+// @Summary Delete user
+// @Description Delete user
+// @ID delete-user
+// @Tags User
+// @Success 204
+// @Failure 400 {object} error
+// @Failure 404 {object} error
+// @Failure 500 {object} error
+// @Router /users/{id} [delete]
+func (h *Handler) DeleteUser(w http.ResponseWriter, r *http.Request) {
+	p := chi.URLParam(r, "id")
+	id, err := strconv.ParseInt(p, 10, 64)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		h.logger.Error(err.Error())
+		return
+	}
+
+	res, err := h.services.User.Delete(r.Context(), id)
+	if err != nil {
+		if errors.Is(err, service.ErrUserNotFound) {
+			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+			h.logger.Error(err.Error())
+			return
+		}
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		h.logger.Error(err.Error())
+		return
+	}
+	if err := json.NewEncoder(w).Encode(res); err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		h.logger.Error(err.Error())
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
 }
