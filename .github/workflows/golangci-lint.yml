@@ -25,18 +25,24 @@ jobs:
         with:
           go-version: ${{ matrix.go }}
           cache: false
+      - name: Install golangci-lint
+        run: |
+          curl -sSfL https://install.golangci-lint.org/golangci-lint.sh | sh -s v1.54.0
+          mv golangci-lint $GOLANGCI_LINT
+        env:
+          GO111MODULE: on
       - name: Lint user_service
-        uses: golangci/golangci-lint-action@v3.7.0
+        run: $GOLANGCI_LINT run
         working-directory: ./user_service
         env:
           GO111MODULE: on
       - name: Lint url_shortening_service
-        uses: golangci/golangci-lint-action@v3.7.0
+        run: $GOLANGCI_LINT run
         working-directory: ./url_shortening_service
         env:
           GO111MODULE: on
       - name: Lint api_gateway_service
-        uses: golangci/golangci-lint-action@v3.7.0
+        run: $GOLANGCI_LINT run
         working-directory: ./api_gateway_service
         env:
           GO111MODULE: on
