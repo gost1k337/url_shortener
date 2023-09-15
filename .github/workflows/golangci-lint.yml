@@ -30,17 +30,23 @@ jobs:
         with:
           version: v1.54
       - name: Lint user_service
-        run: golangci-lint run ./user_service
+        run: |
+          cd ./user_service
+          golangci-lint run
         working-directory: ./user_service
         env:
           GO111MODULE: on
       - name: Lint url_shortening_service
-        run: golangci-lint run ./url_shortening_service
+        run: |
+          cd ./url_shortening_service
+          golangci-lint run
         working-directory: ./url_shortening_service
         env:
           GO111MODULE: on
       - name: Lint api_gateway_service
-        run: golangci-lint run ./api_gateway_service
+        run: |
+          cd ./api_gateway_service
+          golangci-lint run
         working-directory: ./api_gateway_service
         env:
           GO111MODULE: on
