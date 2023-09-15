@@ -31,17 +31,17 @@ jobs:
         env:
           GO111MODULE: on
       - name: Lint user_service
-        run: $GOLANGCI_LINT run
+        run: golangci-lint run
         working-directory: ./user_service
         env:
           GO111MODULE: on
       - name: Lint url_shortening_service
-        run: $GOLANGCI_LINT run
+        run: golangci-lint run
         working-directory: ./url_shortening_service
         env:
           GO111MODULE: on
       - name: Lint api_gateway_service
-        run: $GOLANGCI_LINT run
+        run: golangci-lint run
         working-directory: ./api_gateway_service
         env:
           GO111MODULE: on
