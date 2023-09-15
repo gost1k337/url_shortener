@@ -21,3 +21,24 @@ type GetUrlShortResp struct {
 	Visits      int64     `json:"visits,omitempty"`
 	CreatedAt   time.Time `json:"created_at,omitempty"`
 }
+
+type CreateUserResp struct {
+	Id        int64     `json:"id,omitempty"`
+	Username  string    `json:"username,omitempty"`
+	Email     string    `json:"email,omitempty"`
+	CreatedAt time.Time `json:"created_at,omitempty"`
+}
+
+type GetUserResp struct {
+	Id        int64     `json:"id,omitempty"`
+	Username  string    `json:"username,omitempty"`
+	Email     string    `json:"email,omitempty"`
+	CreatedAt time.Time `json:"created_at,omitempty"`
+}
+
+type DeleteUserResp struct {
+	Id        int64     `json:"id,omitempty"`
+	Username  string    `json:"username,omitempty"`
+	Email     string    `json:"email,omitempty"`
+	CreatedAt time.Time `json:"created_at,omitempty"`
+}
