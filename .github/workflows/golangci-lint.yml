@@ -25,10 +25,11 @@ jobs:
         with:
           go-version: ${{ matrix.go }}
           cache: false
-      - name: golangci-lint
-        uses: golangci/golangci-lint-action@v3
-        with:
-          version: v1.54
+      - name: Install golangci-lint
+        run: |
+          curl -sSfL https://install.golangci-lint.org/golangci-lint.sh | sh -s v1.54.0
+        env:
+          GO111MODULE: on
       - name: Lint user_service
         run: golangci-lint run
         working-directory: ./user_service
