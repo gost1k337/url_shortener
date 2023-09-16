@@ -1,0 +1,20 @@
+run:
+  issues-exit-code: 1
+  allow-parallel-runners: true
+
+  skip-dirs:
+    - "api"
+
+linters:
+  enable-all: true
+
+issues:
+  fix: true
+  exclude-rules:
+    - linters:
+        - lll
+      source: '"github.com/kucera-lukas/micro-backends|//'
+
+linters-settings:
+  lll:
+    line-length: 80
