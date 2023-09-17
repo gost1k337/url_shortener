@@ -7,14 +7,39 @@ run:
 
 linters:
   enable-all: true
+  disable:
+    # deprecated
+    - scopelint
+    - golint
+    - interfacer
+    - maligned
+    - exhaustivestruct
+    - structcheck
+    - varcheck
+    - deadcode
+    - ifshort
+    - nosnakecase
+    - tagalign
+    - depguard
+    - dupl
+    - exhaustruct
+    - revive
+    - stylecheck
+    # irrelevant
+    - goerr113
+    # using goimports-reviser
+    - gci
 
 issues:
   fix: true
   exclude-rules:
     - linters:
         - lll
-      source: '"github.com/kucera-lukas/micro-backends|//'
+      source: '"https://github.com/gost1k337/url_shortener|//'
 
 linters-settings:
   lll:
-    line-length: 80
+    line-length: 120
+  varnamelen:
+    min-name-length: 1
+
