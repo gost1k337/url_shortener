@@ -2,15 +2,16 @@ package service
 
 import (
 	"context"
+	"time"
+
 	"github.com/gost1k337/url_shortener/api_gateway_service/pkg/logging"
 	us "github.com/gost1k337/url_shortener/url_shortening_service/api/protos/url_shorts"
 	u "github.com/gost1k337/url_shortener/user_service/api/protos/user"
-	"time"
 )
 
-type UrlShort interface {
-	Create(ctx context.Context, originalUrl string, expireAt time.Duration) (*CreateUrlShortResp, error)
-	Get(ctx context.Context, token string) (*GetUrlShortResp, error)
+type URLShort interface {
+	Create(ctx context.Context, originalURL string, expireAt time.Duration) (*CreateURLShortResp, error)
+	Get(ctx context.Context, token string) (*GetURLShortResp, error)
 }
 
 type User interface {
@@ -20,18 +21,18 @@ type User interface {
 }
 
 type Services struct {
-	UrlShort
+	URLShort
 	User
 }
 
 type Deps struct {
-	UrlShortService us.UrlShortsClient
+	URLShortService us.UrlShortsClient
 	UserService     u.UserClient
 }
 
 func NewServices(deps *Deps, logger logging.Logger) *Services {
 	return &Services{
-		UrlShort: NewUrlShortService(deps.UrlShortService, logger),
+		URLShort: NewURLShortService(deps.URLShortService, logger),
 		User:     NewUserService(deps.UserService, logger),
 	}
 }

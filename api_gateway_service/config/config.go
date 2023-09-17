@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+
 	"github.com/ilyakaznacheev/cleanenv"
 	"github.com/joho/godotenv"
 )
@@ -11,20 +12,21 @@ type Config struct {
 		Port      string `yaml:"port"`
 		Host      string `yaml:"host"`
 		Debug     bool   `yaml:"debug"`
-		LogOutput string `yaml:"log_output"`
+		LogOutput string `yaml:"logOutput"`
 	} `yaml:"app"`
 
-	UrlShorteningService struct {
+	URLShorteningService struct {
 		Port string `yaml:"port"`
-	} `yaml:"url_shortening_service"`
+	} `yaml:"urlShorteningService"`
 
 	UserService struct {
 		Port string `yaml:"port"`
-	} `yaml:"user_service"`
+	} `yaml:"userService"`
 }
 
 func LoadConfig(configPath string) (*Config, error) {
 	var cfg Config
+
 	if err := godotenv.Load(); err != nil {
 		return nil, fmt.Errorf("load env: %w", err)
 	}

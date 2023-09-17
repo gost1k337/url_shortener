@@ -6,13 +6,17 @@ import (
 
 const (
 	alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	grow     = 10
 )
 
-func NewShortUrl(number uint64) string {
-	length := len(alphabet)
+func NewShortURL(number uint64) string {
 	var encodedBuilder strings.Builder
-	encodedBuilder.Grow(10)
-	for ; number > 0; number = number / uint64(length) {
+
+	length := len(alphabet)
+
+	encodedBuilder.Grow(grow)
+
+	for ; number > 0; number /= uint64(length) {
 		encodedBuilder.WriteByte(alphabet[(number % uint64(length))])
 	}
 

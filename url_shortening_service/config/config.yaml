@@ -1,5 +1,5 @@
 app:
   port: 10001
   debug: true
-  log_output: "./info"
-  base_url: "https://localhost:10000"
+  logOutput: "./info"
+  baseUrl: "https://localhost:10000"

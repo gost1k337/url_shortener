@@ -4,24 +4,24 @@ import (
 	"crypto/rand"
 	"crypto/sha512"
 	"encoding/hex"
+	"fmt"
 )
 
 const SaltSize = 16
 
-func GenerateRandomSalt(saltSize int) []byte {
-	var salt = make([]byte, saltSize)
+func GenerateRandomSalt(saltSize int) ([]byte, error) {
+	salt := make([]byte, saltSize)
 
-	_, err := rand.Read(salt[:])
-
+	_, err := rand.Read(salt)
 	if err != nil {
-		panic(err)
+		return []byte{}, fmt.Errorf("read: %w", err)
 	}
 
-	return salt
+	return salt, nil
 }
 
 func HashPassword(password string, salt []byte) string {
-	var passwordBytes = []byte(password)
+	passwordBytes := []byte(password)
 
 	sha512Hasher := sha512.New()
 

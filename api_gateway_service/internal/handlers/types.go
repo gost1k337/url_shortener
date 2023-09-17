@@ -2,13 +2,13 @@ package handlers
 
 import "time"
 
-type CreateUrlShortInput struct {
-	OriginalUrl string        `json:"original_url"`
-	ExpireAt    time.Duration `json:"expire_at"`
+type CreateURLShortInput struct {
+	OriginalURL string        `json:"originalUrl"`
+	ExpireAt    time.Duration `json:"expireAt"`
 }
 
 type CreateUserInput struct {
 	Username string `json:"username"`
 	Email    string `json:"email"`
-	Password string `json:"password"'`
+	Password string `json:"password"`
 }

@@ -2,24 +2,26 @@ package app
 
 import (
 	"context"
+	"os"
+	"os/signal"
+	"syscall"
+
 	"github.com/gost1k337/url_shortener/url_shortening_service/config"
 	"github.com/gost1k337/url_shortener/url_shortening_service/internal/repository"
 	"github.com/gost1k337/url_shortener/url_shortening_service/internal/service"
 	"github.com/gost1k337/url_shortener/url_shortening_service/pkg/logging"
 	"github.com/gost1k337/url_shortener/url_shortening_service/pkg/postgres"
 	"github.com/gost1k337/url_shortener/url_shortening_service/pkg/server"
-	"os"
-	"os/signal"
-	"syscall"
 )
 
 func Run(cfg *config.Config) {
 	log := logging.NewLogger(cfg)
 
-	pg, err := postgres.New(cfg.Db.DSN)
+	pg, err := postgres.New(cfg.DB.DSN)
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	log.Info("Postgres connected...")
 
 	log.Info("Initializing repositories...")
@@ -37,7 +39,13 @@ func Run(cfg *config.Config) {
 	if err != nil {
 		log.Error("new url short grpc: %w", err)
 	}
-	defer closeGrpcServer()
+
+	defer func() {
+		err = closeGrpcServer()
+		if err != nil {
+			log.Error("close grpc server: %w", err)
+		}
+	}()
 
 	<-ctx.Done()
 	grpcServer.GracefulStop()

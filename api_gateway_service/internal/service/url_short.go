@@ -3,60 +3,68 @@ package service
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"github.com/gost1k337/url_shortener/api_gateway_service/pkg/logging"
 	us "github.com/gost1k337/url_shortener/url_shortening_service/api/protos/url_shorts"
 	"google.golang.org/protobuf/types/known/timestamppb"
-	"time"
 )
 
-type UrlShortService struct {
+type URLShortService struct {
 	c      us.UrlShortsClient
 	logger logging.Logger
 }
 
-func NewUrlShortService(uc us.UrlShortsClient, logger logging.Logger) *UrlShortService {
-	return &UrlShortService{
+func NewURLShortService(uc us.UrlShortsClient, logger logging.Logger) *URLShortService {
+	return &URLShortService{
 		c:      uc,
 		logger: logger,
 	}
 }
 
-func (s *UrlShortService) Create(ctx context.Context, originalUrl string, expireAt time.Duration) (*CreateUrlShortResp, error) {
-	createUrlShortReq := &us.CreateUrlShortRequest{
-		OriginalUrl: originalUrl,
+func (s *URLShortService) Create(ctx context.Context, originalURL string, expireAt time.Duration) (
+	*CreateURLShortResp, error,
+) {
+	createURLShortReq := &us.CreateUrlShortRequest{
+		OriginalUrl: originalURL,
 		ExpireAt:    timestamppb.New(time.Now().Add(expireAt)),
 	}
-	u, err := s.c.Create(ctx, createUrlShortReq)
+
+	urlshort, err := s.c.Create(ctx, createURLShortReq)
 	if err != nil {
 		return nil, fmt.Errorf("url-short create: %w", err)
 	}
-	res := &CreateUrlShortResp{
-		Id:          u.Id,
-		OriginalUrl: u.OriginalUrl,
-		ShortUrl:    u.ShortUrl,
-		Visits:      u.Visits,
-		ExpireAt:    u.ExpireAt.AsTime(),
-		CreatedAt:   u.CreatedAt.AsTime(),
+
+	res := &CreateURLShortResp{
+		ID:          urlshort.Id,
+		OriginalURL: urlshort.OriginalUrl,
+		ShortURL:    urlshort.ShortUrl,
+		Visits:      urlshort.Visits,
+		ExpireAt:    urlshort.ExpireAt.AsTime(),
+		CreatedAt:   urlshort.CreatedAt.AsTime(),
 	}
+
 	return res, nil
 }
 
-func (s *UrlShortService) Get(ctx context.Context, token string) (*GetUrlShortResp, error) {
-	getUrlShortReq := &us.GetUrlShortRequest{
+func (s *URLShortService) Get(ctx context.Context, token string) (*GetURLShortResp, error) {
+	getURLShortReq := &us.GetUrlShortRequest{
 		Token: token,
 	}
 
-	us, err := s.c.Get(ctx, getUrlShortReq)
+	urlshort, err := s.c.Get(ctx, getURLShortReq)
 	if err != nil {
 		return nil, fmt.Errorf("url-short get: %w", err)
 	}
-	res := &GetUrlShortResp{
-		Id:          us.Id,
-		OriginalUrl: us.OriginalUrl,
-		ShortUrl:    us.ShortUrl,
-		Visits:      us.Visits,
-		ExpireAt:    us.ExpireAt.AsTime(),
-		CreatedAt:   us.CreatedAt.AsTime(),
+
+	res := &GetURLShortResp{
+		ID:          urlshort.Id,
+		OriginalURL: urlshort.OriginalUrl,
+		ShortURL:    urlshort.ShortUrl,
+		Visits:      urlshort.Visits,
+		ExpireAt:    urlshort.ExpireAt.AsTime(),
+		CreatedAt:   urlshort.CreatedAt.AsTime(),
 	}
+
 	return res, nil
 }

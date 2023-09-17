@@ -2,6 +2,9 @@ package server
 
 import (
 	"fmt"
+	"net"
+	"time"
+
 	proto "github.com/gost1k337/url_shortener/url_shortening_service/api/protos/url_shorts"
 	"github.com/gost1k337/url_shortener/url_shortening_service/config"
 	urlShortGrpc "github.com/gost1k337/url_shortener/url_shortening_service/internal/delivery/grpc"
@@ -10,8 +13,6 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
 	"google.golang.org/grpc/reflection"
-	"net"
-	"time"
 )
 
 const (
@@ -21,7 +22,9 @@ const (
 	gRPCTime          = 10
 )
 
-func NewUrlShortGrpcServer(cfg *config.Config, logger logging.Logger, services *service.Services) (func() error, *grpc.Server, error) {
+func NewUrlShortGrpcServer(cfg *config.Config, logger logging.Logger, services *service.Services) (
+	func() error, *grpc.Server, error,
+) {
 	l, err := net.Listen("tcp", fmt.Sprintf(":%s", cfg.App.Port))
 	if err != nil {
 		return nil, nil, fmt.Errorf("net listen: %w", err)

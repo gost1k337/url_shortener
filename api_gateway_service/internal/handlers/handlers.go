@@ -4,6 +4,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net"
+	"net/http"
+	"strconv"
+	"time"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/gost1k337/url_shortener/api_gateway_service/config"
@@ -13,9 +18,6 @@ import (
 	"github.com/gost1k337/url_shortener/api_gateway_service/pkg/logging"
 	"github.com/rs/cors"
 	httpSwagger "github.com/swaggo/http-swagger"
-	"net/http"
-	"strconv"
-	"time"
 )
 
 type Handler struct {
@@ -49,15 +51,16 @@ func New(services *service.Services, logger logging.Logger, cfg *config.Config) 
 	r.Use(middleware.DefaultLogger)
 	r.Use(middlewares.CommonMiddleware)
 	r.Get("/swagger/*", httpSwagger.Handler(
-		httpSwagger.URL(fmt.Sprintf("http://%s:%s/swagger/doc.json", cfg.App.Host, cfg.App.Port)),
+		httpSwagger.URL(fmt.Sprintf("http://%s/swagger/doc.json", net.JoinHostPort(cfg.App.Host, cfg.App.Port))),
 	))
-	r.Post("/short", h.CreateUrlShort)
+	r.Post("/short", h.CreateURLShort)
 	r.Get("/u/{token}", h.Redirect)
 	r.Post("/users", h.CreateUser)
 	r.Get("/users/{id}", h.GetUser)
 	r.Delete("/users/{id}", h.DeleteUser)
 
 	h.http = r
+
 	return h
 }
 
@@ -65,37 +68,43 @@ func (h *Handler) HTTP() http.Handler {
 	return h.http
 }
 
-// CreateUrlShort godoc
+// CreateURLShort godoc
 //
 // @Summary Create short url
 // @Description Create short url from url and return it
 // @ID create-short-url
-// @Tags ShortUrl
+// @Tags ShortURL
 // @Success 201
 // @Failure 400 {object} error
 // @Failure 500 {object} error
-// @Router /short [post]
-func (h *Handler) CreateUrlShort(w http.ResponseWriter, r *http.Request) {
-	var input CreateUrlShortInput
+// @Router /short [post].
+func (h *Handler) CreateURLShort(w http.ResponseWriter, r *http.Request) {
+	var input CreateURLShortInput
 
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 		h.logger.Error(err.Error())
+
 		return
 	}
-	input.ExpireAt = input.ExpireAt * time.Hour
 
-	res, err := h.services.UrlShort.Create(r.Context(), input.OriginalUrl, input.ExpireAt)
+	input.ExpireAt *= time.Hour
+
+	res, err := h.services.URLShort.Create(r.Context(), input.OriginalURL, input.ExpireAt)
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		h.logger.Error(err.Error())
+
 		return
 	}
+
 	if err := json.NewEncoder(w).Encode(res); err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		h.logger.Error(err.Error())
+
 		return
 	}
+
 	w.WriteHeader(http.StatusCreated)
 }
 
@@ -104,26 +113,31 @@ func (h *Handler) CreateUrlShort(w http.ResponseWriter, r *http.Request) {
 // @Summary Redirect to original url
 // @Description Redirect user from short url to original url
 // @ID redirect-short-url
-// @Tags ShortUrl
+// @Tags ShortURL
 // @Success 303
 // @Failure 400 {object} error
 // @Failure 500 {object} error
-// @Router /u/{token} [get]
+// @Router /u/{token} [get].
 func (h *Handler) Redirect(w http.ResponseWriter, r *http.Request) {
 	token := chi.URLParam(r, "token")
 	h.logger.Info(token)
-	res, err := h.services.UrlShort.Get(r.Context(), token)
+
+	res, err := h.services.URLShort.Get(r.Context(), token)
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		h.logger.Error(err.Error())
+
 		return
 	}
+
 	if res == nil {
 		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 		h.logger.Error(err.Error())
+
 		return
 	}
-	http.Redirect(w, r, res.OriginalUrl, http.StatusSeeOther)
+
+	http.Redirect(w, r, res.OriginalURL, http.StatusSeeOther)
 }
 
 // CreateUser godoc
@@ -135,13 +149,14 @@ func (h *Handler) Redirect(w http.ResponseWriter, r *http.Request) {
 // @Success 201
 // @Failure 400 {object} error
 // @Failure 500 {object} error
-// @Router /users [post]
+// @Router /users [post].
 func (h *Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	var input CreateUserInput
 
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 		h.logger.Error(err.Error())
+
 		return
 	}
 
@@ -149,13 +164,17 @@ func (h *Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		h.logger.Error(err.Error())
+
 		return
 	}
+
 	if err := json.NewEncoder(w).Encode(res); err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		h.logger.Error(err.Error())
+
 		return
 	}
+
 	w.WriteHeader(http.StatusCreated)
 }
 
@@ -169,13 +188,15 @@ func (h *Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
 // @Failure 400 {object} error
 // @Failure 404 {object} error
 // @Failure 500 {object} error
-// @Router /users/{id} [post]
+// @Router /users/{id} [post].
 func (h *Handler) GetUser(w http.ResponseWriter, r *http.Request) {
 	p := chi.URLParam(r, "id")
+
 	id, err := strconv.ParseInt(p, 10, 64)
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 		h.logger.Error(err.Error())
+
 		return
 	}
 
@@ -184,17 +205,23 @@ func (h *Handler) GetUser(w http.ResponseWriter, r *http.Request) {
 		if errors.Is(err, service.ErrUserNotFound) {
 			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 			h.logger.Error(err.Error())
+
 			return
 		}
+
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		h.logger.Error(err.Error())
+
 		return
 	}
+
 	if err := json.NewEncoder(w).Encode(res); err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		h.logger.Error(err.Error())
+
 		return
 	}
+
 	w.WriteHeader(http.StatusOK)
 }
 
@@ -208,13 +235,15 @@ func (h *Handler) GetUser(w http.ResponseWriter, r *http.Request) {
 // @Failure 400 {object} error
 // @Failure 404 {object} error
 // @Failure 500 {object} error
-// @Router /users/{id} [delete]
+// @Router /users/{id} [delete].
 func (h *Handler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	p := chi.URLParam(r, "id")
+
 	id, err := strconv.ParseInt(p, 10, 64)
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 		h.logger.Error(err.Error())
+
 		return
 	}
 
@@ -223,16 +252,22 @@ func (h *Handler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 		if errors.Is(err, service.ErrUserNotFound) {
 			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 			h.logger.Error(err.Error())
+
 			return
 		}
+
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		h.logger.Error(err.Error())
+
 		return
 	}
+
 	if err := json.NewEncoder(w).Encode(res); err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		h.logger.Error(err.Error())
+
 		return
 	}
+
 	w.WriteHeader(http.StatusNoContent)
 }

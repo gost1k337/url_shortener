@@ -2,6 +2,7 @@ package httpserver
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"time"
 )
@@ -27,19 +28,19 @@ func New(handler http.Handler, opts ...Option) *Server {
 		Addr:         defaultAddr,
 	}
 
-	s := &Server{
+	srv := &Server{
 		server:          httpServer,
 		notify:          make(chan error, 1),
 		shutdownTimeout: defaultShutdownTimeout,
 	}
 
 	for _, opt := range opts {
-		opt(s)
+		opt(srv)
 	}
 
-	s.start()
+	srv.start()
 
-	return s
+	return srv
 }
 
 func (s *Server) start() {
@@ -57,5 +58,7 @@ func (s *Server) Shutdown() error {
 	ctx, cancel := context.WithTimeout(context.Background(), s.shutdownTimeout)
 	defer cancel()
 
-	return s.server.Shutdown(ctx)
+	err := s.server.Shutdown(ctx)
+
+	return fmt.Errorf("shutdown: %w", err)
 }

@@ -5,41 +5,49 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"time"
+
 	"github.com/gost1k337/url_shortener/url_shortening_service/internal/entity"
 	"github.com/gost1k337/url_shortener/url_shortening_service/pkg/logging"
 	"github.com/gost1k337/url_shortener/url_shortening_service/pkg/postgres"
-	"time"
 )
 
-type ShortUrlRepo struct {
+type ShortURLRepo struct {
 	*postgres.Postgres
 	logger logging.Logger
 }
 
-func NewShortUrlRepo(pg *postgres.Postgres, logger logging.Logger) *ShortUrlRepo {
-	return &ShortUrlRepo{
+func NewShortURLRepo(pg *postgres.Postgres, logger logging.Logger) *ShortURLRepo {
+	return &ShortURLRepo{
 		pg,
 		logger,
 	}
 }
 
-func (r *ShortUrlRepo) Create(ctx context.Context, userId int, originalUrl, shortUrl string, expireAt time.Time) (int, error) {
-	query := `INSERT INTO url_shorts (original_url, short_url, visits, expire_at) VALUES ($1, $2, $3, $4) RETURNING id`
+func (r *ShortURLRepo) Create(ctx context.Context, userId int, originalURL, shortURL string, expireAt time.Time) (
+	int64, error,
+) {
+	query := `INSERT INTO url_shorts (original_url, short_url, visits, expire_at) VALUES ($1, $2, $3, $4)`
 
-	row := r.QueryRowContext(ctx, query, originalUrl, shortUrl, 0, expireAt)
-	var id int
-	if err := row.Scan(&id); err != nil {
-		return 0, fmt.Errorf("scan %w", err)
+	row, err := r.ExecContext(ctx, query, originalURL, shortURL, 0, expireAt)
+	if err != nil {
+		return 0, fmt.Errorf("query: %w", err)
 	}
+
+	id, err := row.LastInsertId()
+	if err != nil {
+		return 0, fmt.Errorf("create: %w", err)
+	}
+
 	return id, nil
 }
 
-func (r *ShortUrlRepo) GetById(ctx context.Context, id int) (*entity.ShortURL, error) {
+func (r *ShortURLRepo) GetByID(ctx context.Context, id int64) (*entity.ShortURL, error) {
 	query := `SELECT * FROM url_shorts WHERE id=$1`
 
 	row := r.QueryRowContext(ctx, query, id)
 	if errors.Is(row.Err(), sql.ErrNoRows) {
-		return nil, nil
+		return nil, fmt.Errorf("no rows")
 	}
 
 	shortUrl := new(entity.ShortURL)
@@ -54,15 +62,16 @@ func (r *ShortUrlRepo) GetById(ctx context.Context, id int) (*entity.ShortURL, e
 	); err != nil {
 		return nil, fmt.Errorf("scan: %w", err)
 	}
+
 	return shortUrl, nil
 }
 
-func (r *ShortUrlRepo) GetByShort(ctx context.Context, shortUrlToken string) (*entity.ShortURL, error) {
+func (r *ShortURLRepo) GetByShort(ctx context.Context, shortUrlToken string) (*entity.ShortURL, error) {
 	query := `SELECT * FROM url_shorts WHERE short_url=$1`
 
 	row := r.QueryRowContext(ctx, query, shortUrlToken)
 	if errors.Is(row.Err(), sql.ErrNoRows) {
-		return nil, nil
+		return nil, fmt.Errorf("no rows")
 	}
 
 	shortUrl := new(entity.ShortURL)
@@ -76,5 +85,6 @@ func (r *ShortUrlRepo) GetByShort(ctx context.Context, shortUrlToken string) (*e
 	); err != nil {
 		return nil, fmt.Errorf("scan: %w", err)
 	}
+
 	return shortUrl, nil
 }

@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+
 	"github.com/ilyakaznacheev/cleanenv"
 	"github.com/joho/godotenv"
 )
@@ -10,16 +11,17 @@ type Config struct {
 	App struct {
 		Port      string `yaml:"port"`
 		Debug     bool   `yaml:"debug"`
-		LogOutput string `yaml:"log_output"`
+		LogOutput string `yaml:"logOutput"`
 	} `yaml:"app"`
 
-	Db struct {
-		DSN string `env-required:"true" env:"POSTGRES_DSN"`
+	DB struct {
+		DSN string `env:"POSTGRES_DSN" env-required:"true"`
 	}
 }
 
 func LoadConfig(configPath string) (*Config, error) {
 	var cfg Config
+
 	if err := godotenv.Load(); err != nil {
 		return nil, fmt.Errorf("load env: %w", err)
 	}

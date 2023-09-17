@@ -3,6 +3,7 @@ package postgres
 import (
 	"database/sql"
 	"fmt"
+
 	_ "github.com/lib/pq"
 )
 
@@ -13,7 +14,6 @@ type Postgres struct {
 
 func New(dsn string) (*Postgres, error) {
 	conn, err := sql.Open("postgres", dsn)
-
 	if err != nil {
 		return nil, fmt.Errorf("open: %w", err)
 	}

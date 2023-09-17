@@ -19,7 +19,7 @@ const docTemplate = `{
             "post": {
                 "description": "Create short url from url and return it",
                 "tags": [
-                    "ShortUrl"
+                    "ShortURL"
                 ],
                 "summary": "Create short url",
                 "operationId": "create-short-url",
@@ -42,7 +42,7 @@ const docTemplate = `{
             "get": {
                 "description": "Redirect user from short url to original url",
                 "tags": [
-                    "ShortUrl"
+                    "ShortURL"
                 ],
                 "summary": "Redirect to original url",
                 "operationId": "redirect-short-url",

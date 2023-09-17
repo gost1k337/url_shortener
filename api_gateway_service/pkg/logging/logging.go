@@ -23,5 +23,6 @@ func NewLogger(cfg *config.Config) Logger {
 
 	logger, _ := zapConfig.Build()
 	sugar := logger.Sugar()
+
 	return Logger{sugar}
 }

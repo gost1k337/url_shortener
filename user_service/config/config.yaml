@@ -1,4 +1,4 @@
 app:
   port: 10002
   debug: true
-  log_output: "./info"
+  logOutput: "./info"

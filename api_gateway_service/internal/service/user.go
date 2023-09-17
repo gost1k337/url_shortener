@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+
 	"github.com/gost1k337/url_shortener/api_gateway_service/pkg/hasher"
 	"github.com/gost1k337/url_shortener/api_gateway_service/pkg/logging"
 	u "github.com/gost1k337/url_shortener/user_service/api/protos/user"
@@ -23,7 +24,11 @@ func NewUserService(uc u.UserClient, logger logging.Logger) *UserService {
 }
 
 func (s *UserService) Create(ctx context.Context, username, email, password string) (*CreateUserResp, error) {
-	salt := hasher.GenerateRandomSalt(hasher.SaltSize)
+	salt, err := hasher.GenerateRandomSalt(hasher.SaltSize)
+	if err != nil {
+		return nil, fmt.Errorf("generate salt: %w", err)
+	}
+
 	hash := hasher.HashPassword(password, salt)
 	req := &u.CreateUserRequest{
 		Username:     username,
@@ -37,7 +42,7 @@ func (s *UserService) Create(ctx context.Context, username, email, password stri
 	}
 
 	resp := &CreateUserResp{
-		Id:        user.Id,
+		ID:        user.Id,
 		Username:  user.Username,
 		Email:     user.Email,
 		CreatedAt: user.CreatedAt.AsTime(),
@@ -58,14 +63,15 @@ func (s *UserService) Get(ctx context.Context, id int64) (*GetUserResp, error) {
 			if status.Code() == codes.NotFound {
 				return nil, ErrUserNotFound
 			}
+
 			return nil, fmt.Errorf("grpc user get: %v, code (%s )", status.Message(), status.Code())
-		} else {
-			return nil, fmt.Errorf("non-grpc err: %w", err)
 		}
+
+		return nil, fmt.Errorf("non-grpc err: %w", err)
 	}
 
 	resp := &GetUserResp{
-		Id:        user.Id,
+		ID:        user.Id,
 		Username:  user.Username,
 		Email:     user.Email,
 		CreatedAt: user.CreatedAt.AsTime(),
@@ -86,14 +92,15 @@ func (s *UserService) Delete(ctx context.Context, id int64) (*DeleteUserResp, er
 			if status.Code() == codes.NotFound {
 				return nil, ErrUserNotFound
 			}
+
 			return nil, fmt.Errorf("grpc user delete: %v, code (%s )", status.Message(), status.Code())
-		} else {
-			return nil, fmt.Errorf("non-grpc err: %w", err)
 		}
+
+		return nil, fmt.Errorf("non-grpc err: %w", err)
 	}
 
 	resp := &DeleteUserResp{
-		Id:        user.Id,
+		ID:        user.Id,
 		Username:  user.Username,
 		Email:     user.Email,
 		CreatedAt: user.CreatedAt.AsTime(),

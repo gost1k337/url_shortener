@@ -2,8 +2,12 @@ package app
 
 import (
 	"fmt"
+	"os"
+	"os/signal"
+	"syscall"
+
 	"github.com/gost1k337/url_shortener/api_gateway_service/config"
-	"github.com/gost1k337/url_shortener/api_gateway_service/internal/client/url_short_service"
+	"github.com/gost1k337/url_shortener/api_gateway_service/internal/client/urlshort_service"
 	"github.com/gost1k337/url_shortener/api_gateway_service/internal/client/user_service"
 	"github.com/gost1k337/url_shortener/api_gateway_service/internal/handlers"
 	"github.com/gost1k337/url_shortener/api_gateway_service/internal/service"
@@ -11,9 +15,6 @@ import (
 	"github.com/gost1k337/url_shortener/api_gateway_service/pkg/logging"
 	us "github.com/gost1k337/url_shortener/url_shortening_service/api/protos/url_shorts"
 	u "github.com/gost1k337/url_shortener/user_service/api/protos/user"
-	"os"
-	"os/signal"
-	"syscall"
 )
 
 // Run
@@ -22,27 +23,31 @@ import (
 // @version         			1.0
 // @description     			This is a REST API service for creating short urls.
 // @host      					localhost:10000
-// @BasePath  					/
+// @BasePath  					/.
 func Run(cfg *config.Config) {
 	log := logging.NewLogger(cfg)
 
 	log.Info("Connecting to url-shortening service...")
-	usGrpcClient, err := url_short_service.NewUrlShortServiceConn(fmt.Sprintf(":%s", cfg.UrlShorteningService.Port), log)
+
+	usGrpcClient, err := urlshort_service.NewURLShortServiceConn(fmt.Sprintf(":%s", cfg.URLShorteningService.Port), log)
 	if err != nil {
 		log.Error(err)
 	}
+
 	usService := us.NewUrlShortsClient(usGrpcClient.GRPCClient)
 
 	log.Info("Connecting to url-shortening service...")
+
 	uGrpcClient, err := user_service.NewUserServiceConn(fmt.Sprintf(":%s", cfg.UserService.Port), log)
 	if err != nil {
 		log.Error(err)
 	}
+
 	uService := u.NewUserClient(uGrpcClient.GRPCClient)
 
 	log.Info("Initializing services...")
 	services := service.NewServices(&service.Deps{
-		UrlShortService: usService,
+		URLShortService: usService,
 		UserService:     uService,
 	}, log)
 
@@ -62,9 +67,10 @@ func Run(cfg *config.Config) {
 	}
 
 	log.Info("Shutting down...")
+
 	err = httpServer.Shutdown()
+
 	if err != nil {
 		log.Error(fmt.Errorf("app - Run - httpServer.Shutdown: %w", err))
 	}
-
 }

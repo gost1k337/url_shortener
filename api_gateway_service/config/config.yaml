@@ -2,8 +2,8 @@ app:
   port: 10000
   host: "localhost"
   debug: true
-  log_output: "./info"
-url_shortening_service:
+  logOutput: "./info"
+urlShorteningService:
   port: 10001
-user_service:
+userService:
   port: 10002
