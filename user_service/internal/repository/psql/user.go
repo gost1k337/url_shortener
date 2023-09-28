@@ -27,14 +27,11 @@ func NewUserRepo(pg *postgres.Postgres, logger logging.Logger) *UserRepo {
 func (r *UserRepo) Create(ctx context.Context, username, email, passwordHash string) (int64, error) {
 	query := `INSERT INTO users (username, email, password_hash) VALUES ($1, $2, $3) RETURNING id`
 
-	row, err := r.ExecContext(ctx, query, username, email, passwordHash)
+	var id int64
+
+	err := r.QueryRowContext(ctx, query, username, email, passwordHash).Scan(&id) //nolint:execinquery
 	if err != nil {
 		return 0, fmt.Errorf("query: %w", err)
-	}
-
-	id, err := row.LastInsertId()
-	if err != nil {
-		return 0, fmt.Errorf("get id: %w", err)
 	}
 
 	return id, nil
@@ -44,11 +41,6 @@ func (r *UserRepo) GetByID(ctx context.Context, id int64) (*entity.User, error) 
 	query := `SELECT * FROM users WHERE id=$1`
 
 	rows, err := r.QueryContext(ctx, query, id)
-
-	defer func() {
-		err = rows.Close()
-	}()
-
 	if err != nil {
 		if errors.Is(rows.Err(), sql.ErrNoRows) {
 			return nil, repoerrors.ErrNotFound
@@ -56,6 +48,10 @@ func (r *UserRepo) GetByID(ctx context.Context, id int64) (*entity.User, error) 
 
 		return nil, fmt.Errorf("query: %w", err)
 	}
+
+	defer func() {
+		err = rows.Close()
+	}()
 
 	user := new(entity.User)
 
