@@ -1,0 +1,48 @@
+version: "3"
+
+services:
+  postgres:
+    container_name: u_postgres
+    image: postgres:15.4
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    env_file:
+      - .docker.env
+    restart: unless-stopped
+    networks:
+      - user_network
+    healthcheck:
+      test: "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  user_service:
+    container_name: user_service
+    build: .
+    networks:
+      - user_network
+    volumes:
+      - ./logs:/logs
+    env_file:
+      - .docker.env
+    restart: unless-stopped
+
+  migrate:
+    image: migrate/migrate
+    networks:
+      - user_network
+    volumes:
+      - ../migrations:/migrations
+    command: ["-path", "/migrations", "-database", "${POSTGRES_DSN}", "up"]
+    links:
+      - postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+networks:
+  user_network:
+    external: true
+volumes:
+  pg-data:
