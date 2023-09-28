@@ -4,6 +4,8 @@ app:
   debug: true
   logOutput: "./info"
 urlShorteningService:
+  host: "localhost"
   port: 10001
 userService:
+  host: "localhost"
   port: 10002
