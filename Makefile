@@ -18,10 +18,10 @@ migrate-status:
 	$(MIGRATE) version
 
 migrate-up:
-	$(MIGRATE) -source ${SOURCE} -database "${DB}" up 1
+	$(MIGRATE) -source ${SOURCE} -database "${DB}" up
 
 migrate-down:
-	$(MIGRATE) -source ${SOURCE} -database "${DB}" down 1
+	$(MIGRATE) -source ${SOURCE} -database "${DB}" down
 
 lint: $(GOLANGCI_LINT)
 	@$(foreach dir,$(MODULE_DIRS),( \
