@@ -35,7 +35,7 @@ func (s *ShortURLService) Create(ctx context.Context, userId int, originalUrl st
 	rMin := new(big.Int).SetInt64(1)
 	rMax := new(big.Int).SetInt64(math.MaxInt64)
 
-	r, err := rand.Int(rand.Reader, new(big.Int).Sub(rMax, rMin)) //nolint:gomnd
+	r, err := rand.Int(rand.Reader, new(big.Int).Sub(rMax, rMin))
 	if err != nil {
 		return nil, fmt.Errorf("rand: %w", err)
 	}
