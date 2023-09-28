@@ -27,16 +27,13 @@ func NewShortURLRepo(pg *postgres.Postgres, logger logging.Logger) *ShortURLRepo
 func (r *ShortURLRepo) Create(ctx context.Context, userId int, originalURL, shortURL string, expireAt time.Time) (
 	int64, error,
 ) {
-	query := `INSERT INTO url_shorts (original_url, short_url, visits, expire_at) VALUES ($1, $2, $3, $4)`
+	query := `INSERT INTO url_shorts (original_url, short_url, visits, expire_at) VALUES ($1, $2, $3, $4) RETURNING id`
 
-	row, err := r.ExecContext(ctx, query, originalURL, shortURL, 0, expireAt)
+	var id int64
+
+	err := r.QueryRowContext(ctx, query, originalURL, shortURL, 0, expireAt).Scan(&id) //nolint:execinquery
 	if err != nil {
 		return 0, fmt.Errorf("query: %w", err)
-	}
-
-	id, err := row.LastInsertId()
-	if err != nil {
-		return 0, fmt.Errorf("create: %w", err)
 	}
 
 	return id, nil
