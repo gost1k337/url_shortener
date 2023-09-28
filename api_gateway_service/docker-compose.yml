@@ -1,0 +1,22 @@
+version: "3"
+
+services:
+  api_gateway_service:
+    container_name: api_gateway_service
+    build: .
+    networks:
+      - user_network
+      - url_short_network
+    volumes:
+      - ./logs:/logs
+    env_file:
+      - .docker.env
+    ports:
+      - "${PORT}:${PORT}"
+    restart: unless-stopped
+
+networks:
+  url_short_network:
+    external: true
+  user_network:
+    external: true
