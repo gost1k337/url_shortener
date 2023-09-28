@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/rand"
 	"fmt"
+	"math"
 	"math/big"
 	"time"
 
@@ -31,7 +32,10 @@ func NewShortURLService(repo repository.ShortURL, logger logging.Logger, cfg *co
 func (s *ShortURLService) Create(ctx context.Context, userId int, originalUrl string, expireAt time.Time) (
 	*entity.ShortURL, error,
 ) {
-	r, err := rand.Int(rand.Reader, big.NewInt(27)) //nolint:gomnd
+	rMin := new(big.Int).SetInt64(1)
+	rMax := new(big.Int).SetInt64(math.MaxInt64)
+
+	r, err := rand.Int(rand.Reader, new(big.Int).Sub(rMax, rMin)) //nolint:gomnd
 	if err != nil {
 		return nil, fmt.Errorf("rand: %w", err)
 	}
