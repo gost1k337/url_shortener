@@ -188,7 +188,7 @@ func (h *Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
 // @Failure 400 {object} error
 // @Failure 404 {object} error
 // @Failure 500 {object} error
-// @Router /users/{id} [post].
+// @Router /users/{id} [get].
 func (h *Handler) GetUser(w http.ResponseWriter, r *http.Request) {
 	p := chi.URLParam(r, "id")
 

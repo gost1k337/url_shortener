@@ -1,4 +1,4 @@
-basePath: /
+basePath: /.
 host: localhost:10000
 info:
   contact: {}
@@ -21,7 +21,7 @@ paths:
           schema: {}
       summary: Create short url
       tags:
-      - ShortUrl
+      - ShortURL
   /u/{token}:
     get:
       description: Redirect user from short url to original url
@@ -37,5 +37,58 @@ paths:
           schema: {}
       summary: Redirect to original url
       tags:
-      - ShortUrl
+      - ShortURL
+  /users:
+    post:
+      description: Create user
+      operationId: create-user
+      responses:
+        "201":
+          description: Created
+        "400":
+          description: Bad Request
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Create user
+      tags:
+      - User
+  /users/{id}:
+    delete:
+      description: Delete user
+      operationId: delete-user
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema: {}
+        "404":
+          description: Not Found
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Delete user
+      tags:
+      - User
+    get:
+      description: Get user
+      operationId: get-user
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema: {}
+        "404":
+          description: Not Found
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Get user
+      tags:
+      - User
 swagger: "2.0"

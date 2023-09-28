@@ -60,6 +60,81 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/users": {
+            "post": {
+                "description": "Create user",
+                "tags": [
+                    "User"
+                ],
+                "summary": "Create user",
+                "operationId": "create-user",
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/users/{id}": {
+            "get": {
+                "description": "Get user",
+                "tags": [
+                    "User"
+                ],
+                "summary": "Get user",
+                "operationId": "get-user",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete user",
+                "tags": [
+                    "User"
+                ],
+                "summary": "Delete user",
+                "operationId": "delete-user",
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            }
         }
     }
 }`
@@ -68,7 +143,7 @@ const docTemplate = `{
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
 	Host:             "localhost:10000",
-	BasePath:         "/",
+	BasePath:         "/.",
 	Schemes:          []string{},
 	Title:            "Url Shortener",
 	Description:      "This is a REST API service for creating short urls.",
