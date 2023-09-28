@@ -22,6 +22,11 @@ func Run(cfg *config.Config) {
 		log.Fatal(err)
 	}
 
+	err = pg.Ping()
+	if err != nil {
+		log.Fatalf("db conn: %v", err)
+	}
+
 	log.Info("Postgres connected...")
 
 	log.Info("Initializing repositories...")
